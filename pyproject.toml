@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "al_phonebook"
+version = "0.1.0"
+description = "A CLI 'phonebook' to record information about people you know."
+authors = ["Vitor Hugo <vtr@hotmail.com.br>"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+pydantic = "^1.9.0"
+textual = "^0.1.14"
+tqdm = "^4.62.3"
+loguru = "^0.5.3"
+
+[tool.poetry.dev-dependencies]
+pytest = "^6.2.5"
+mypy = "^0.931"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
