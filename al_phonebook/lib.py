@@ -95,3 +95,25 @@ class TinyDBDatabase(AbcDatabase):
         return r
 
 
+class Model:
+    def __init__(self, database: Type[AbcDatabase] = TinyDBDatabase()) -> None:
+        self.database = database
+
+    def all(self) -> list[DictItem]:
+        return self.database.all()
+
+    def get(self, id: int) -> DictItem:
+        r: DictItem = self.database.get(id=id)
+        return r
+
+    def add_item(self, item: Item) -> int:
+        result: int = self.database.add_item(item)
+        return result
+
+    def add_items(self, items: Sequence[Item]) -> list[int]:
+        ids: list[int] = self.database.add_items(items)
+        return ids
+
+    def filter(self, filters: DictItem) -> list[DictItem]:
+        result: list[DictItem] = self.database.filter(filters)
+        return result
