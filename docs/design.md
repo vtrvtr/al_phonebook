@@ -27,3 +27,4 @@ Stretch features:
 - The project will be fully typed and statically checked by `mypy` to increase the probability of correctness.
 - The testing framework used will be `pytest` to simplify test-writting. Test coverage should be 100% for the library and at least 75% for the CLI part. 
 - The project will be developed on Windows 10 and tested on the Windows Linux Subsystem to guarantee compatibility. The distro used will be Debian. 
+- The project will use [`hypothesis`](https://hypothesis.readthedocs.io/en/latest/) for testing.
