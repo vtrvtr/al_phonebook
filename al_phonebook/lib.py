@@ -1,24 +1,19 @@
-from collections import defaultdict
+import inspect
 import os
 from abc import ABC, abstractmethod, abstractproperty
+from collections import defaultdict
 from functools import reduce
 from pathlib import Path
 from typing import Any, Optional, Sequence, Type
-import inspect
 
-from pydantic import (
-    BaseModel,
-    EmailStr,
-    constr,
-    PositiveInt,
-    ValidationError,
-    create_model,
-)
+from pydantic import (BaseModel, EmailStr, PositiveInt, 
+                      constr, create_model)
 from tinydb import TinyDB, where
 from tinydb.queries import QueryInstance
 from tinydb.storages import MemoryStorage
+
 from .constants import CONSTANTS
-from .types import DictItem, PathLike, OptionalDictItem
+from .types import DictItem, OptionalDictItem, PathLike
 
 
 class Item(BaseModel):
