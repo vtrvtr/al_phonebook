@@ -130,14 +130,14 @@ class TinyDBDatabase(AbcDatabase):
         if workspace:
             r: OptionalDictItem = self.db.table(workspace).get(doc_id=id)
         else:
-        r: OptionalDictItem = self.db.get(doc_id=id)
+            r: OptionalDictItem = self.db.get(doc_id=id)
         return r
 
     def add_item(self, item: DictItem, workspace: Optional[str] = None) -> int:
         if workspace:
             result: int = self.db.table(workspace).insert(item.dict())
         else:
-        result: int = self.db.insert(item.dict())
+            result: int = self.db.insert(item.dict())
         return result
 
     def add_items(
@@ -159,9 +159,9 @@ class TinyDBDatabase(AbcDatabase):
         items: Sequence[DictItem] = filters.items()
 
         if exact:
-        query = [
+            query = [
                 where(field_name) == field_value for field_name, field_value in items
-        ]
+            ]
         else:
             query = [
                 poorman_fulltext_filter(field_name, field_value)
