@@ -1,0 +1,4 @@
+database: {}
+model:
+  custom_model:
+    path: "[PATH_TO_SCHEMA_FOLDER]/custom_model_example.py"
