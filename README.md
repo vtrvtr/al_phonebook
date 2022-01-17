@@ -129,6 +129,20 @@ To add a new plugin:
 al_phonebook list -f ClassName1
 ```
 
+### Protip
+
+The folder `$HOME/.al_phonebook/plugins` is automatically part of the plugins path. This means that if you go there and create, for example `json_formatter.py`:
+
+```py
+import json
+
+class JsonFormatter:
+
+    def format(d):
+        return json.dumps(d, indent=4)
+```
+
+You'll automatically have a formatter that prints the contact's info in a json format. 
 
 # Developing
 
