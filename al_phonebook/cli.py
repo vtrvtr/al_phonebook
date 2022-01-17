@@ -12,7 +12,7 @@ from rich.layout import Layout
 from rich.panel import Panel
 
 
-# TODO: Update UI with rich/textual
+# TODO: #5 Update UI with rich/textual
 CONSOLE = Console()
 
 

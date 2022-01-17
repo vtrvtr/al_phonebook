@@ -66,7 +66,7 @@ class AbcDatabase(ABC):
     def id_field_name(self) -> str:
         raise NotImplementedError()
 
-    #TODO: All should return a generator
+    #TODO: #7 All should return a generator
     @abstractmethod
     def all(self) -> Sequence[DictItem]:
         raise NotImplementedError()
@@ -154,7 +154,7 @@ class TinyDBDatabase(AbcDatabase):
         """Returns a subset of the items in the phonebook. If exact is True
         only returns exact matches. By default checks if the values of `filters` are in the
         entries."""
-        # TODO: Add better search support for various types
+        # TODO: #8 Add better search support for various types
 
         items: Sequence[DictItem] = filters.items()
 
