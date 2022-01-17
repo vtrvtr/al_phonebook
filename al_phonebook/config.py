@@ -1,8 +1,10 @@
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional, Union, Type, cast
+from typing import Optional, Union, Type, cast, Sequence
 import sys
 import importlib
+from warnings import warn
+import inspect
 
 import yaml
 from pydantic import (
@@ -20,12 +22,15 @@ from .constants import CONSTANTS
 
 SUPPORTED_TYPES = {"integer": int, "string": str, "email": EmailStr, "float": float}
 
+
 class Configuration(BaseModel):
     custom_fields: OptionalDictItem
     custom_model_path: Path = Field(
         None, description="Path to the custom model to be used."
     )
     database_path: Optional[Path]
+    plugins_folders: Optional[Sequence[Path]]
+    formatters: Optional[list[str]]
 
     @validator("custom_model_path")
     def is_valid_model_path(cls, v):
@@ -36,6 +41,13 @@ class Configuration(BaseModel):
             raise ConfigurationError(FileNotFoundError(f"Path {v} doesn't exist"))
         if v.suffix != ".py":
             raise ConfigurationError("Custom model path must be a .py file.")
+        return v
+
+    @validator("plugins_folders")
+    def is_valid_plugins_folders(cls, v):
+        for p in v:
+            if not p.exists():
+                raise ConfigurationError(FileNotFoundError(f"Path {v} doesn't exist"))
         return v
 
     @validator("database_path")
@@ -51,6 +63,12 @@ class Configuration(BaseModel):
 
 
 def parse_configuration(path: PathLike) -> Configuration:
+    """
+    Builds `Configuration` object from reading `path`, which points to an yaml file.
+
+    :raises FileNotFoundError: If `path` doesn't exist
+    :raises ConfigurationError: If an error occurs in the validation of the configuration
+    """
     p = Path(path)
     if not p.exists():
         raise FileNotFoundError("File {p} doesn't exist.")
@@ -65,15 +83,20 @@ def parse_configuration(path: PathLike) -> Configuration:
                 config_dict.get("model", {}).get("custom_model", {}).get("path")
             )
             custom_fields = config_dict.get("model", {}).get("custom_fields")
+            plugins_folders = config_dict.get("display", {}).get("paths", [])
+            if default_plugin_folder() not in plugins_folders:
+                plugins_folders.append(default_plugin_folder())
+            formatters = config_dict.get("display", {}).get("formatters")
             config = Configuration(
                 custom_model_path=custom_model_path,
                 database_path=database_path,
                 custom_fields=custom_fields,
+                plugins_folders=plugins_folders,
+                formatters=formatters,
             )
             return config
         except ValidationError as e:
             raise ConfigurationError(e)
-
 
 
 def configuration_folder() -> Path:
@@ -95,8 +118,14 @@ def configuration_file() -> Path:
     return path
 
 
+def default_plugin_folder() -> Path:
+    path = configuration_folder() / "plugins"
+    if not path.exists():
+        path.mkdir(parents=True)
+    return path
 
-#TODO: #6 Add validation for custom pydantic model
+
+# TODO: #6 Add validation for custom pydantic model
 def load_schema_py(path: PathLike) -> BaseModel:
     """Loads a pydantic model from `path` to be used as the main Item for the
     database.
@@ -114,7 +143,6 @@ def load_schema_py(path: PathLike) -> BaseModel:
         raise ConfigurationError(
             f"Couldn't import Item from {p}. Make sure there's a Item pydantic model in it."
         )
-
 
 
 def augment_schema(fields: DictItem) -> Type[Item]:
