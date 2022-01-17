@@ -33,14 +33,23 @@ def create_out_item(item_schema: Type[Item]) -> Type[Item]:
     return create_model("OutItem", id=(PositiveInt, ...), __base__=item_schema)
 
 
-    env_path = os.environ.get("ALPB_DB_PATH")
-    if not env_path:
-        path = Path(".")
-    else:
-        path = Path(env_path)
-        if not path.is_dir():
-            raise DatabasePathError(path)
-    return TinyDB(path / ".aldb.json")
+class SchemaDefitinionError(Exception):
+    def __init__(self, path: PathLike) -> None:
+        super().__init__(
+            f"Couldn't load `Item` from {path}. Pydantic model must be named `Item`. Aborting..."
+        )
+
+
+class SchemaLoadingError(Exception):
+    def __init__(self, path: PathLike) -> None:
+        super().__init__(
+            f"Couldn't load `Item` from {path}. Supported extensions are: .py, .yaml. Aborting..."
+        )
+
+
+class DatabasePathError(Exception):
+    def __init__(self, path: PathLike) -> None:
+        super().__init__(f"The path {path} is invalid.")
 
 
 class AbcDatabase(ABC):
