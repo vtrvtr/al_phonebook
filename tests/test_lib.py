@@ -15,6 +15,7 @@ from al_phonebook.config import (
     augment_schema,
     create_item_model,
 )
+from al_phonebook.formatter_registry import FormatterRegistry
 from hypothesis import strategies as st, given
 
 
@@ -222,3 +223,148 @@ def test_exact_filter(models_with_data, data) -> None:
         r2 = model.filter({"name": "bruce"}, exact=True)
         assert r[0] == data[1]
         assert r2 == []
+
+
+def test_discover_plugin_files() -> None:
+    temp_plugin_folder1 = tempfile.mkdtemp()
+    temp_plugin_folder2 = tempfile.mkdtemp()
+
+    config_dict = {
+        "display": {
+            "paths": [temp_plugin_folder1, temp_plugin_folder2],
+            "formatters": ["myPlugin.JsonFormatter"],
+        }
+    }
+
+    config = Configuration(
+        formatters=config_dict.get("display").get("formatters"),
+        plugins_folders=config_dict.get("display").get("paths"),
+    )
+
+    files = []
+    for i in range(2):
+        files.append(tempfile.TemporaryFile(dir=temp_plugin_folder1, suffix=".py"))
+    for i in range(2):
+        files.append(tempfile.TemporaryFile(dir=temp_plugin_folder2, suffix=".py"))
+
+    discovered_files = []
+    for folder in config.plugins_folders:
+        for file in folder.iterdir():
+            discovered_files.append(file)
+
+    assert sorted(discovered_files) == sorted([Path(f.name) for f in files])
+
+
+def test_load_plugin() -> None:
+    temp_plugin_folder1 = tempfile.mkdtemp()
+    temp_plugin_folder2 = tempfile.mkdtemp()
+
+    config = {
+        "display": {
+            "paths": [temp_plugin_folder1, temp_plugin_folder2],
+            "formatters": ["JsonFormatter"],
+        }
+    }
+
+    config = Configuration(
+        formatters=config.get("display").get("formatters"),
+        plugins_folders=config.get("display").get("paths"),
+    )
+
+    class_name = config.formatters[0]
+    code = f"""
+import json
+
+class {class_name}:
+
+    def format(d):
+        json.dumps(s)
+    
+    """
+
+    with tempfile.NamedTemporaryFile(
+        dir=temp_plugin_folder1, suffix=".py", mode="w", delete=False
+    ) as f:
+        f.write(code)
+
+    registry = FormatterRegistry.from_configuration(config)
+
+    formatter = registry.formatters[class_name]
+
+    assert getattr(formatter, "format")
+
+
+def test_format_with_plugin(models_with_data) -> None:
+    temp_plugin_folder1 = tempfile.mkdtemp()
+
+    config = {
+        "display": {
+            "paths": [temp_plugin_folder1],
+            "formatters": ["PrintOneMore"],
+        }
+    }
+
+    config = Configuration(
+        formatters=config.get("display").get("formatters"),
+        plugins_folders=config.get("display").get("paths"),
+    )
+
+    class_name = config.formatters[0]
+    code = f"""
+class {class_name}:
+
+    def format(d) -> str:
+        return str(d) + " 1"
+    
+    """
+
+    with tempfile.NamedTemporaryFile(
+        dir=temp_plugin_folder1, suffix=".py", mode="w", delete=False
+    ) as f:
+        f.write(code)
+
+    registry = FormatterRegistry.from_configuration(config)
+
+    formatter = registry.formatters[class_name]
+
+
+    expected = "name='Adam' address=None email='adam@al.com' phone_number='999999999' age=30 1"
+    for model in models_with_data:
+        assert expected == formatter.format(model.all().get("personal")[0])
+
+
+
+def test_plugin_wrong_def() -> None:
+    temp_plugin_folder1 = tempfile.mkdtemp()
+
+    config = {
+        "display": {
+            "paths": [temp_plugin_folder1],
+            "formatters": ["PrintOneMore"],
+        }
+    }
+
+    config = Configuration(
+        formatters=config.get("display").get("formatters"),
+        plugins_folders=config.get("display").get("paths"),
+    )
+
+    class_name = config.formatters[0]
+    # All classes must have a `format` method. This one here will not be added
+    # to the registry
+    code = f"""
+class {class_name}:
+
+    def not_format(d) -> str:
+        return str(d) + " 1"
+    
+    """
+
+    with tempfile.NamedTemporaryFile(
+        dir=temp_plugin_folder1, suffix=".py", mode="w", delete=False
+    ) as f:
+        f.write(code)
+
+    registry = FormatterRegistry.from_configuration(config)
+
+    assert class_name not in registry.formatters

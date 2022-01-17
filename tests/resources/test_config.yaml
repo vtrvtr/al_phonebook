@@ -12,4 +12,11 @@ model:
 database:
   path: "tests/resources/.test_db.json"
 
-  
+display:
+  paths: 
+  - plugins
+  formatters:
+  - testPlugin.JsonFormatter
+
+
+
