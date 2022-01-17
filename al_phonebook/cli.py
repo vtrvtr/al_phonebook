@@ -58,12 +58,12 @@ def add(model, workspace: Optional[str] = None) -> None:
     click.echo("Adding contact!\n")
     d = {}
     t = Table()
-    for data in (
+    for name, data in (
         schema_of(model.ItemSchema)
         .get("definitions")
         .get("Item")
         .get("properties")
-        .values()
+        .items()
     ):
         parameter_styled = click.style(
             f"{data['title'].lower()}", bold=True, blink=True, fg="yellow"
@@ -71,7 +71,7 @@ def add(model, workspace: Optional[str] = None) -> None:
         r = click.prompt(f"Enter the contact's {parameter_styled}", default="")
         t.add_column(data["title"])
         if r:
-            d[data["title"].lower()] = r
+            d[name] = r
 
     try:
         item = Item(**d)
