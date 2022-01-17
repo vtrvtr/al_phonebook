@@ -23,3 +23,6 @@ Models can be described using pydantic and dynamically changed if needed.
 
 TinyDB is a little NoSQL database written in a less than 2k lines of code which works perfectly for this small project. I will, however, abstract the database so it's easy to change to another one if necessary.
 
+## Delete functionality
+
+Delete functionality is actually not in the prompt for the task. I was going to implement it, but I'll skip since it was not asked for. 

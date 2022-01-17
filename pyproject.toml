@@ -4,6 +4,7 @@ version = "0.1.0"
 description = "A CLI 'phonebook' to record information about people you know."
 authors = ["Vitor Hugo <vtr@hotmail.com.br>"]
 license = "MIT"
+readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.9"
@@ -13,6 +14,12 @@ tqdm = "^4.62.3"
 loguru = "^0.5.3"
 phonenumbers = "^8.12.41"
 tinydb = "^4.5.2"
+click = "^8.0.3"
+PyYAML = "^6.0"
+rich = "^11.0.0"
+
+[tool.poetry.scripts]
+al_phonebook = "al_phonebook.main:app"
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.2.5"
@@ -20,6 +27,7 @@ mypy = "^0.931"
 pytest-mypy = "^0.8.1"
 black = "^21.12b0"
 hypothesis = "^6.35.0"
+types-PyYAML = "^6.0.3"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
