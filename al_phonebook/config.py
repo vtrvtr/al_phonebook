@@ -47,3 +47,48 @@ class Configuration(BaseModel):
 
     class Config:
         extra = "forbid"
+
+
+def parse_configuration(path: PathLike) -> Configuration:
+    p = Path(path)
+    if not p.exists():
+        raise FileNotFoundError("File {p} doesn't exist.")
+
+    with p.open(mode="r") as f:
+        config_dict = yaml.safe_load(f)
+        try:
+            database_path = config_dict.get("database", {}).get(
+                "path", configuration_folder() / ".alpb.json"
+            )
+            custom_model_path = (
+                config_dict.get("model", {}).get("custom_model", {}).get("path")
+            )
+            custom_fields = config_dict.get("model", {}).get("custom_fields")
+            config = Configuration(
+                custom_model_path=custom_model_path,
+                database_path=database_path,
+                custom_fields=custom_fields,
+            )
+            return config
+        except ValidationError as e:
+            raise ConfigurationError(e)
+
+
+
+def configuration_folder() -> Path:
+    """Default configuration folder. Both the yaml file to configure the application
+    and the database are saved here by default. The latter can be changed in the configuration file
+    itself.
+    """
+    path = Path.home() / CONSTANTS.CONFIG_FOLDER_NAME.value
+    if not path.exists():
+        path.mkdir(parents=True)
+    return path
+
+
+def configuration_file() -> Path:
+    path = configuration_folder() / "settings.yaml"
+    if not path.exists():
+        with path.open("w") as f:
+            yaml.dump({"model": {}, "database": {}}, f)
+    return path
