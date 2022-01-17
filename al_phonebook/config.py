@@ -47,7 +47,7 @@ class Configuration(BaseModel):
     def is_valid_plugins_folders(cls, v):
         for p in v:
             if not p.exists():
-                raise ConfigurationError(FileNotFoundError(f"Path {v} doesn't exist"))
+                raise ConfigurationError(FileNotFoundError(f"Path {p} doesn't exist"))
         return v
 
     @validator("database_path")

@@ -14,6 +14,7 @@ from al_phonebook.config import (
     load_schema_py,
     augment_schema,
     create_item_model,
+    default_plugin_folder
 )
 from al_phonebook.formatter_registry import FormatterRegistry
 from hypothesis import strategies as st, given
@@ -43,7 +44,7 @@ def test_add_one_item(name) -> None:
 def test_filter(models_with_data, data) -> None:
     for model in models_with_data:
         r = model.filter({"name": "Bruce"})
-        assert r[0] == data[1]
+        assert r[0].name == data[1].name
 
 
 @given(name=st.text(min_size=5, max_size=100), email=st.emails())
@@ -61,7 +62,7 @@ def test_filter_item_multiple_parms(name, email) -> None:
         i = Item(name=name, email=email)
         m.database.add_item(i)
         r = m.filter({"email": email, "name": name})
-        assert i.dict() in r
+        assert i.name in r[0].name
 
 
 def test_add_items() -> None:
@@ -126,6 +127,8 @@ def test_parse_config() -> None:
     config_file = Path(__file__).parent / "resources" / "test_config.yaml"
     db_path = Path(__file__).parent / "resources" / ".test_db.json"
     model_path = Path(__file__).parent / "resources" / "custom_model.py"
+    plugins_folder = default_plugin_folder()
+
     p = parse_configuration(config_file)
 
     custom_fields = {
@@ -140,6 +143,8 @@ def test_parse_config() -> None:
     assert p.database_path.absolute() == db_path
     assert p.custom_model_path.absolute() == model_path
     assert p.custom_fields == custom_fields
+    assert plugins_folder in p.plugins_folders
+
 
 
 def test_parse_config_invalid_file() -> None:
@@ -179,10 +184,6 @@ def test_custom_fields_from_config() -> None:
     assert model.__fields__.get("secondary_email")
 
 
-def test_add_custom_formatter() -> None:
-    assert False
-
-
 def test_add_to_different_datasets(models_with_data) -> None:
     for model in models_with_data:
         i = Item(name="WorkOnlyPerson")
@@ -194,14 +195,14 @@ def test_filter_different_datasets(models_with_data_multiple_workspaces, data) -
     for model in models_with_data_multiple_workspaces:
         r = model.filter({"age": 33})
         r2 = model.filter({"age": 33}, workspace="secondary")
-        assert data[3] in r2
+        assert data[3].name in r2[0].name
         assert r == []
 
 
 def test_filter_non_string_fields(data, models_with_data) -> None:
     for model in models_with_data:
         r = model.filter({"age": 33})
-        assert r[0] == data[3]
+        assert r[0].name == data[3].name
 
 
 @pytest.mark.skip("Feature not necessary for now, nice to have in the future.")
@@ -221,7 +222,7 @@ def test_exact_filter(models_with_data, data) -> None:
     for model in models_with_data:
         r = model.filter({"name": "Bruce"}, exact=True)
         r2 = model.filter({"name": "bruce"}, exact=True)
-        assert r[0] == data[1]
+        assert r[0].name == data[1].name
         assert r2 == []
 
 
@@ -368,3 +369,9 @@ class {class_name}:
     registry = FormatterRegistry.from_configuration(config)
 
     assert class_name not in registry.formatters
+
+
+#TODO: Implement performance testing.
+@pytest.mark.skip("To be implemented.")
+def test_performance():
+    assert False

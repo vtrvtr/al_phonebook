@@ -1,18 +1,19 @@
-from numbers import Complex
-from typing import Optional
-from .lib import Model, Item
-from .config import parse_configuration, configuration_file, create_database_model
-from .formatter_registry import FormatterRegistry
-from .constants import CONSTANTS
 import os
+from typing import Optional
+
 import click
-from pydantic import schema_of, ValidationError
-from rich.table import Table
+from pydantic import ValidationError, schema_of
 from rich.console import Console
 from rich.layout import Layout
 from rich.panel import Panel
 from rich.pretty import pprint
+from rich.table import Table
 
+from .config import (configuration_file, create_database_model,
+                     parse_configuration)
+from .constants import CONSTANTS
+from .formatter_registry import FormatterRegistry
+from .lib import Item, Model
 
 # TODO: #5 Update UI with rich/textual
 CONSOLE = Console()
