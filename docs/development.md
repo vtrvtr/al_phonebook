@@ -26,3 +26,8 @@ TinyDB is a little NoSQL database written in a less than 2k lines of code which 
 ## Delete functionality
 
 Delete functionality is actually not in the prompt for the task. I was going to implement it, but I'll skip since it was not asked for. 
+
+
+# Further work
+
+* Clarify what "display information in at least 2 ways" mean. I didn't have enough time to implement it, but `rich` offers lots of customization for how to display the text in the terminal. Anyway, my plan was to write a `Printer` class that would have a `formatter` argument, which in turn would translate an `Item` to some kind of formatting. If the task was to implement different kinds of text styles, `formatter` could do that exposing a subset of `rich`s styling capabilities. If it would be more of a layout question, e.g how many fields to display, then maybe isolate that part into an object that would take an `Item` and return only the fields specified by the user.
