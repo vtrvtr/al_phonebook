@@ -183,24 +183,70 @@ class TinyDBDatabase(AbcDatabase):
 
 
 class Model:
-    def __init__(self, database: Type[AbcDatabase] = TinyDBDatabase()) -> None:
+    def __init__(
+        self,
+        database: Optional[AbcDatabase] = None,
+        custom_item_schema: Optional[Type[BaseModel]] = None,
+    ) -> None:
+        if not database:
+            database = TinyDBDatabase()
+        assert database is not None
         self.database = database
+        self.ItemSchema = custom_item_schema or Item
 
-    def all(self) -> list[DictItem]:
-        return self.database.all()
+    def all(self) -> dict[str, Sequence[Item]]:
+        """Returns all entries in the phonebook"""
+        r: dict[str, Any] = defaultdict(list)
 
-    def get(self, id: int) -> DictItem:
-        r: DictItem = self.database.get(id=id)
+        for workspace, entries in self.database.all().items():
+            for entry in entries:
+                r[workspace].append(self.ItemSchema(**entry))
         return r
 
-    def add_item(self, item: Item) -> int:
-        result: int = self.database.add_item(item)
+    def get(self, id: int, workspace: Optional[str] = None) -> Item:
+        """Gets a single entry from the phonebook"""
+        r: DictItem = self.database.get(id, workspace)
+        return self.ItemSchema(**r)
+
+    def add_item(
+        self, item: DictItem, workspace: Optional[str] = None
+    ) -> Optional[int]:
+        """Adds a single entry to the phonebook.Returns an id for the added item.
+        :raises ValidationError if the input doesn't conform to the schema."""
+        item = self.ItemSchema(**item)
+        result: Optional[int] = self.database.add_item(item, workspace=workspace)
         return result
 
-    def add_items(self, items: Sequence[Item]) -> list[int]:
-        ids: list[int] = self.database.add_items(items)
+    def add_items(self, items: Sequence[DictItem], workspace: Optional[str] = None) -> Sequence[int] | Sequence[None]:
+        """Adds multiple items. Returns a list of ids for the added items.
+        :raises ValidationError if the input doesn't conform to the schema."""
+        items = [self.ItemSchema(**item) for item in items]
+        ids: Sequence[int] = self.database.add_items(items, workspace=workspace)
         return ids
 
-    def filter(self, filters: DictItem) -> list[DictItem]:
-        result: list[DictItem] = self.database.filter(filters)
-        return result
+    def filter(self, filters: DictItem, workspace: Optional[str] = None, **kwargs) -> Sequence[Item]:
+        """Returns a subset of the items in the phonebook. Additional options can be passed with keyword
+        arguments depending on the database being used."""
+        result: Sequence[DictItem] = self.database.filter(filters, workspace=workspace, **kwargs)
+        OutSchema = create_out_item(self.ItemSchema)
+        output = []
+        for entry in result:
+            entry["id"] = entry.get(self.database.id_field_name, getattr(entry, self.database.id_field_name))
+            output.append(OutSchema(**entry))
+        return output
+
+    def update(self, id: int, update: DictItem, workspace: str = None) -> Optional[int]:
+        """Updated a single document by `id`.
+        :raises ValidationError In case the update values are not valid."""
+        InSchema = convert_fields_to_optional(self.ItemSchema)
+        update = InSchema(**update)
+        update_data = update.dict(exclude_unset=True)
+        return self.database.update(id=id, update=update_data, workspace=workspace)
+
+    def update_item_schema(self, new_schema: BaseModel) -> None:
+        """Updates the item schema being used. If the database layout changes,
+        you can call this to update the Item
+
+        :param new_schema: [description]
+        """
+        self.ItemSchema = new_schema
