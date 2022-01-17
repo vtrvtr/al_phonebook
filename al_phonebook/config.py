@@ -164,3 +164,21 @@ def create_database_model(config: Configuration) -> Model:
     item_schema = create_item_model(config)
     return Model(database=db, custom_item_schema=item_schema)
 
+
+class ConfigurationError(Exception):
+    def __init__(self, message: Union[Exception, str]) -> None:
+        super().__init__(f"Couldn't load current configuration. {message}")
+
+
+class SchemaLoadingError(Exception):
+    def __init__(self, path: PathLike) -> None:
+        super().__init__(
+            f"Couldn't load `Item` from {path}. File must exist. Supported extensions are: .py, .yaml. Aborting..."
+        )
+
+
+class SchemaFieldError(Exception):
+    def __init__(self, field: str) -> None:
+        super().__init__(
+            f"The field `{field}` must have a default value because it's required."
+        )
