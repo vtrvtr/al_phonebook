@@ -1,0 +1,8 @@
+fields:
+  age:
+    type: integer 
+  secondary_email:
+    type: email 
+    required: true 
+    default: "foo@bar.com"
+  

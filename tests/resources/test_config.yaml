@@ -1,0 +1,15 @@
+model:
+  custom_model:
+    path: "tests/resources/custom_model.py"
+  custom_fields:
+    age:
+      type: integer 
+    secondary_email:
+      type: email 
+      required: true 
+      default: "foo@bar.com"
+
+database:
+  path: "tests/resources/.test_db.json"
+
+  

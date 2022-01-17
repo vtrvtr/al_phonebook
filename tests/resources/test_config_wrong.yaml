@@ -1,0 +1,15 @@
+model:
+  custom_model:
+    path: "foo/bar.py"
+  custom_fields:
+    age:
+      type: integer 
+    secondary_email:
+      type: email 
+      required: true 
+      default: "foo@bar.com"
+
+database:
+  path: 123123
+
+  
