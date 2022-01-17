@@ -4,20 +4,28 @@ from abc import ABC, abstractmethod, abstractproperty
 from functools import reduce
 from pathlib import Path
 from typing import Any, Optional, Sequence, Type
+import inspect
 
+from pydantic import (
+    BaseModel,
+    EmailStr,
+    constr,
     PositiveInt,
+    ValidationError,
+    create_model,
+)
 from tinydb import TinyDB, where
 from tinydb.queries import QueryInstance
 from tinydb.storages import MemoryStorage
+from .constants import CONSTANTS
 from .types import DictItem, PathLike, OptionalDictItem
 
-DictItem = dict[str, Any]
-OptionalDictItem = DictItem | None
 
 class Item(BaseModel):
     name: constr(max_length=100, strip_whitespace=True)  # type: ignore
     email: Optional[EmailStr]
     phone_number: Optional[constr(max_length=15, strip_whitespace=True, min_length=8)]  # type: ignore
+    age: Optional[PositiveInt]
 
 def convert_fields_to_optional(parent_class: Type[BaseModel]):
     """Given a parent Pydantic model, create a new one with all the fields being optionals
