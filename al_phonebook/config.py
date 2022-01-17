@@ -92,3 +92,75 @@ def configuration_file() -> Path:
         with path.open("w") as f:
             yaml.dump({"model": {}, "database": {}}, f)
     return path
+
+
+
+#TODO: Add validation for custom pydantic model
+def load_schema_py(path: PathLike) -> BaseModel:
+    """Loads a pydantic model from `path` to be used as the main Item for the
+    database.
+
+    :raises ConfigurationError: If there's a problem loading `Item` from file in `path`.
+    """
+    p = Path(path)
+    sys.path.append(p.parent.as_posix())
+    module_name = p.stem
+    try:
+        module = importlib.import_module(module_name)
+        model_schema: Item = module.Item
+        return model_schema
+    except:
+        raise ConfigurationError(
+            f"Couldn't import Item from {p}. Make sure there's a Item pydantic model in it."
+        )
+
+
+SUPPORTED_TYPES = {"integer": int, "string": str, "email": EmailStr}
+
+
+def augment_schema(fields: DictItem) -> Type[Item]:
+    """Adds fields from `fields` to the default pydantic model `Item`.
+    Only a subset of field types are supported. They listed in `config.SUPPORTED_TYPES`. If
+    the type described isn't included there, it defaults to `str`.
+
+    :raises SchemaFieldError: In case there's a field configuration error.
+    """
+    parsed_fields = {}
+    for field_name, properties in fields.items():
+        field_type = properties.get("type", str)
+        is_required = properties.get("required")
+        if is_required:
+            default_value = properties.get("default")
+            if not default_value:
+                raise SchemaFieldError(field_name)
+            parsed_fields[field_name] = (
+                SUPPORTED_TYPES.get(field_type),
+                default_value,
+            )
+        else:
+            parsed_fields[field_name] = (SUPPORTED_TYPES.get(field_type), None)
+    schema: Type[Item] = create_model("Item", **parsed_fields, __base__=Item)
+    return schema
+
+
+def create_item_model(config: Configuration) -> Type[Item]:
+    if config.custom_model_path:
+        schema = cast(Type[Item], load_schema_py(config.custom_model_path))
+        return schema
+
+    if config.custom_fields:
+        schema = augment_schema(config.custom_fields)
+        return schema
+
+    return Item
+
+
+def create_database_model(config: Configuration) -> Model:
+    """
+    Creates a Model using TinyDB as a database. `config` configures the database as needed.
+    """
+    assert config.database_path
+    db = TinyDBDatabase(path=config.database_path)
+    item_schema = create_item_model(config)
+    return Model(database=db, custom_item_schema=item_schema)
+
