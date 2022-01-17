@@ -10,7 +10,6 @@ Key features:
 
 - The CLI should allow users to:
   - Add more contacts;
-  - Remove contacts;
   - Search for a particular information;
   - List all contacts data;
   - Filter contact list based on contact data;
@@ -28,3 +27,5 @@ Stretch features:
 - The testing framework used will be `pytest` to simplify test-writting. Test coverage should be 100% for the library and at least 75% for the CLI part. 
 - The project will be developed on Windows 10 and tested on the Windows Linux Subsystem to guarantee compatibility. The distro used will be Debian. 
 - The project will use [`hypothesis`](https://hypothesis.readthedocs.io/en/latest/) for testing.
+- `click` will be used for parsing arguments.
+- `rich` will be used for text rendering.
