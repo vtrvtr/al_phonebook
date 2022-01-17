@@ -12,12 +12,22 @@ After cloning the repository, run:
 poetry install
 ```
 
-
 If `poetry` isn't available, run: 
 
 ```
 pip install requirements.txt
 ```
+
+### NOTE
+
+On Linux it seems Poetry is having problem with Python 3.10.1. For me what worked was to install:
+
+
+```
+pip install cleo tomlkit poetry.core requests cachecontrol cachy html5lib pkginfo virtualenv lockfile  
+```
+
+from [this issue](https://github.com/python-poetry/poetry/issues/3071#issuecomment-1013591803).
 
 ## Using
 

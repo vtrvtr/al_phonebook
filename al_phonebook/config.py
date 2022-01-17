@@ -19,6 +19,7 @@ from .lib import Item, TinyDBDatabase, Model
 from .constants import CONSTANTS
 
 
+
 class Configuration(BaseModel):
     custom_fields: OptionalDictItem
     custom_model_path: Path = Field(
@@ -95,7 +96,7 @@ def configuration_file() -> Path:
 
 
 
-#TODO: Add validation for custom pydantic model
+#TODO: #6 Add validation for custom pydantic model
 def load_schema_py(path: PathLike) -> BaseModel:
     """Loads a pydantic model from `path` to be used as the main Item for the
     database.
