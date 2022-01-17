@@ -4,6 +4,22 @@
 
 `AL_Phonebook` uses `pydantic` for data validation! No more writing the wrong data!
 
+## Features
+
+### Add contacts
+
+![add](examples/images/example_add.gif)
+
+### Add contacts to specific workspaces
+
+![add](examples/images/example_add_workspace.gif)
+
+### Search for contacts and format the output as you wish
+
+
+![search](examples/images/example_custom_formatter.gif)
+
+
 ## Installing
 
 After cloning the repository, run:
