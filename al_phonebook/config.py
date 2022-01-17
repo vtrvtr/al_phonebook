@@ -18,7 +18,7 @@ from .types import OptionalDictItem, PathLike, DictItem
 from .lib import Item, TinyDBDatabase, Model
 from .constants import CONSTANTS
 
-
+SUPPORTED_TYPES = {"integer": int, "string": str, "email": EmailStr, "float": float}
 
 class Configuration(BaseModel):
     custom_fields: OptionalDictItem
@@ -115,8 +115,6 @@ def load_schema_py(path: PathLike) -> BaseModel:
             f"Couldn't import Item from {p}. Make sure there's a Item pydantic model in it."
         )
 
-
-SUPPORTED_TYPES = {"integer": int, "string": str, "email": EmailStr}
 
 
 def augment_schema(fields: DictItem) -> Type[Item]:
