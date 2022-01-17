@@ -12,6 +12,11 @@ After cloning the repository, run:
 poetry install
 ```
 
+If `poetry` isn't available, run: 
+
+```
+pip install requirements.txt
+```
 
 ### NOTE
 
@@ -23,13 +28,6 @@ pip install cleo tomlkit poetry.core requests cachecontrol cachy html5lib pkginf
 ```
 
 from [this issue](https://github.com/python-poetry/poetry/issues/3071#issuecomment-1013591803).
-
-
-If `poetry` isn't available, run: 
-
-```
-pip install requirements.txt
-```
 
 ## Using
 
