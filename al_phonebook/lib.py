@@ -4,7 +4,7 @@ from functools import reduce
 from pathlib import Path
 from typing import Any, Optional, Sequence, Type
 
-from pydantic import BaseModel, EmailStr, constr
+    PositiveInt,
 from tinydb import TinyDB, where
 from tinydb.queries import QueryInstance
 from tinydb.storages import MemoryStorage
@@ -17,15 +17,19 @@ class Item(BaseModel):
     email: Optional[EmailStr]
     phone_number: Optional[constr(max_length=15, strip_whitespace=True, min_length=8)]  # type: ignore
 
+def convert_fields_to_optional(parent_class: Type[BaseModel]):
+    """Given a parent Pydantic model, create a new one with all the fields being optionals
+    This only works for models that are not nested."""
+    child_class = create_model("InItem", __base__=parent_class)
+    for key in child_class.__fields__:
+        child_class.__fields__.get(key).required = False
+    return child_class
 
-class DatabasePathError(Exception):
-    def __init__(self, path: Path) -> None:
-        super().__init__(f"The path {path} is invalid")
 
+def create_out_item(item_schema: Type[Item]) -> Type[Item]:
+    """Given a `item_schema` Pydantic model, creates a new one with an additional field `id`"""
+    return create_model("OutItem", id=(PositiveInt, ...), __base__=item_schema)
 
-def get_database(in_memory: bool = False) -> TinyDB:
-    if in_memory:
-        return TinyDB(storage=MemoryStorage)
 
     env_path = os.environ.get("ALPB_DB_PATH")
     if not env_path:
