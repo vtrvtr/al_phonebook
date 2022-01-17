@@ -96,6 +96,40 @@ al_phonebook add
 
 And the interactive prompt will ask for `rating`! 
 
+## Formatting customization
+
+`AL_Phonebook` comes with a plugin system to output your contact's information in any way you want. 
+
+To add a new plugin: 
+
+1. In `settings.yaml` add the following: 
+```yaml
+      display:
+        paths: 
+        - PATH_TO_FOLDER_WITH_PLUGIN
+        formatters:
+        - ClassName1
+        - ClassName2
+``` 
+  The plug-in system will search `PATH_TO_FOLDER_WITH_PLUGIN` for valid formatters. A valid formatter a used defined class with a `format` method.
+
+2. Execute 
+```bash
+  al_phonebook list-formatters
+```
+
+   to check if your formatter was sucessfully registered. If yes, it should print:
+
+   ```bash
+  📖 Starting AL Phonebook! 📖
+  ClassName1, ClassName2
+  ```
+3. After that you can use a formatter with `search` and `list` commands:
+```bash
+al_phonebook list -f ClassName1
+```
+
+
 # Developing
 
 To run tests: 
