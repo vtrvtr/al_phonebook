@@ -1,5 +1,5 @@
 import os
-from abc import ABC, abstractclassmethod, abstractmethod
+from abc import ABC, abstractmethod, abstractproperty
 from functools import reduce
 from pathlib import Path
 from typing import Any, Optional, Sequence, Type
@@ -42,8 +42,14 @@ def create_out_item(item_schema: Type[Item]) -> Type[Item]:
 
 
 class AbcDatabase(ABC):
+
+    @abstractproperty
+    def id_field_name(self) -> str:
+        raise NotImplementedError()
+
+    #TODO: All should return a generator
     @abstractmethod
-    def all(self) -> list[DictItem]:
+    def all(self) -> Sequence[DictItem]:
         raise NotImplementedError()
 
     @abstractmethod
@@ -55,11 +61,15 @@ class AbcDatabase(ABC):
         raise NotImplementedError()
 
     @abstractmethod
-    def add_items(self, items: Sequence[Item]) -> list[int]:
+    def add_items(self, items: Sequence[Item]) -> Sequence[int]:
         raise NotImplementedError()
 
     @abstractmethod
-    def filter(self, filters: DictItem) -> list[DictItem]:
+    def filter(self, filters: DictItem, **kwargs) -> Sequence[DictItem]:
+        raise NotImplementedError()
+
+    @abstractmethod
+    def update(self, id: int, update: DictItem) -> Optional[int]:
         raise NotImplementedError()
 
 
